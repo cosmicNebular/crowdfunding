@@ -1,20 +1,18 @@
-pragma solidity >=0.4.22 <0.7.0;
-
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.6.5;
 
 contract CampaignFactory {
+    address[] public deployedCampaigns;
 
-    Campaign[] public deployedCampaigns;
-
-    function createCampaign(uint minimum) public {
-        Campaign newCampaign = new Campaign(minimum, msg.sender);
+    function createCampaign(uint minimumContri) public {
+        address newCampaign = address(new Campaign(minimumContri, msg.sender));
         deployedCampaigns.push(newCampaign);
     }
 
-    function getDeployedCampaigns() public view returns (Campaign[] memory) {
+    function getDeployedCampaigns() public view returns(address[] memory) {
         return deployedCampaigns;
     }
 }
-
 
 contract Campaign {
     // Manager is the one creating the contract
@@ -28,11 +26,12 @@ contract Campaign {
         mapping(address => bool) approvals;
     }
 
-    Request[] public requests;
-    address public manager;
+    address payable public manager;
     uint public minimumContribution;
     mapping(address => bool) public approvers;
     uint public approversCount;
+
+    Request[] public requests;
 
     //Modifier is needed to restrict non managers from requesting payment of any sort
     modifier restricted() {
@@ -40,67 +39,70 @@ contract Campaign {
         _;
     }
 
-
-    constructor(uint minimum, address creator) public {
+    constructor(uint c, address payable creator) public {
         manager = creator;
-        minimumContribution = minimum;
+        minimumContribution = c;
     }
 
     function contribute() public payable {
         require(msg.value > minimumContribution);
 
+        // Keep track of number of contributors
+        if(!approvers[msg.sender]) {
+            approversCount ++;
+        }
         approvers[msg.sender] = true;
-        approversCount++;
     }
 
-
     function createRequest(string memory description, uint value, address payable recipient) public restricted {
+        // Ensure we can't ask for more money than the contract holds
+        require(value <= address(this).balance);
+
         Request memory newRequest = Request({
-        description : description,
-        value : value,
-        recipient : recipient,
-        complete : false,
-        approvalCount : 0
+        description: description,
+        value: value,
+        recipient: recipient,
+        complete: false,
+        approvalCount: 0
         });
 
         requests.push(newRequest);
     }
 
-
     function approveRequest(uint index) public {
-        Request storage request = requests[index];
-
+        // he is contributer
+        // he has not already approved that request
         require(approvers[msg.sender]);
         require(!requests[index].approvals[msg.sender]);
 
-        request.approvals[msg.sender] = true;
-        request.approvalCount++;
+        // make this contributer's approval true in that request
+        // increment the approvalCount of that request
+        requests[index].approvals[msg.sender] = true;
+        requests[index].approvalCount++;
     }
-
 
     function finalizeRequest(uint index) public restricted {
-        Request storage request = requests[index];
+        // Request is not already finalized
+        // Request Approval count is greater than total approvers/contributers
+        require(!requests[index].complete);
+        require(requests[index].approvalCount > (approversCount/2));
 
-        require(request.approvalCount > (approversCount / 2));
-        require(!request.complete);
-
-        request.recipient.transfer(request.value);
-        request.complete = true;
+        // transfer money
+        // mark request as completed
+        requests[index].recipient.transfer(requests[index].value);
+        requests[index].complete = true;
     }
-
-    function getSummary() public view returns (
-        uint, uint, uint, uint, address
-    ) {
+    function getSummary() public view returns( uint, uint, uint, uint, address ) {
         return (
         minimumContribution,
-        this.balance,
+        address(this).balance,
         requests.length,
         approversCount,
         manager
         );
     }
 
-    function getRequestsCount() public view returns (uint) {
+    function getRequestCount() public view returns( uint ) {
         return requests.length;
     }
 }

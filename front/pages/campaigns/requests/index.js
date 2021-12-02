@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Button, Table } from "semantic-ui-react";
-import { Link } from "../../../routes";
+import { Link } from "../../../../server/routes";
 import Layout from "../../../components/Layout";
-import Campaign from "../../../ethereum/campaign";
+import Campaign from "../../../../ethereum/campaign";
 import RequestRow from "../../../components/RequestRow";
 
 class RequestIndex extends Component {
