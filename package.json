@@ -12,7 +12,7 @@
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build",
     "compile-contract": "node ethereum/compile.js"
   },
-  "author": "",
+  "author": "Klykov Andrey",
   "license": "ISC",
   "devDependencies": {
     "ganache-cli": "^6.12.2",
