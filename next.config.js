@@ -3,7 +3,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 })
 
 module.exports = withBundleAnalyzer({
-    basePath: 'front/pages',
     devIndicators: {
         buildActivityPosition: 'bottom-right',
     }

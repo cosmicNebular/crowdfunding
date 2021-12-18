@@ -1,12 +1,12 @@
 import React from "react";
 import { Menu } from "semantic-ui-react";
-import { Link } from "../../server/routes";
+import { Link } from "../../back/routes";
 
 const Header = () => {
   return (
     <Menu style={{ marginTop: "10px" }}>
       <Link route="/">
-        <a className="item">CrowdCoin</a>
+        <a className="item">Crowdfund</a>
       </Link>
       <Menu.Menu position="right">
         <Link route="/">

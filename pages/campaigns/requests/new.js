@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Form, Button, Message, Input } from "semantic-ui-react";
-import Campaign from "../../../../ethereum/campaign";
-import web3 from "../../../../ethereum/web3";
-import { Link, Router } from "../../../../server/routes";
-import Layout from "../../../components/Layout";
+import Campaign from "../../../ethereum/campaign";
+import web3 from "../../../ethereum/web3";
+import { Link, Router } from "../../../back/routes";
+import Layout from "../../../front/components/Layout";
 
 class RequestNew extends Component {
   state = {
@@ -33,7 +33,7 @@ class RequestNew extends Component {
       await campaign.methods
         .createRequest(description, web3.utils.toWei(value, "ether"), recipient)
         .send({ from: accounts[0] });
-      Router.pushRoute(`/campaigns/${this.props.address}/requests`);
+      await Router.pushRoute(`/campaigns/${this.props.address}/requests`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
